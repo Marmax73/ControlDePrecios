@@ -1,25 +1,30 @@
 
 import './App.css';
-import ScannerButton from './components/scanner';
-
+import BarcodeScanner from './components/scanner';
+import React, { useState } from 'react';
 
 
 function App() {
-  const handleResult = (result) => {
-    alert(`📦 Código escaneado: ${result}`);
+   const [resultados, setResultados] = useState([]);
+
+  const manejarEscaneo = (nuevoObjeto) => {
+    setResultados((prev) => [...prev, nuevoObjeto]);
+    alert(`✅ Escaneado: ${nuevoObjeto.producto}`);
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h3>Escanée el producto</h3>
-        <h5>Utilice la cámara de su móvil</h5>
-      </header>
-      
-      { <div style={{ padding: '2rem'}}>
-        <h1>Escáner con botón</h1>
-        <ScannerButton onScan={handleResult} />
-      </div> }
+    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <h2>Escáner de Códigos</h2>
+      <BarcodeScanner onScanComplete={manejarEscaneo} />
+
+      <h3 style={{ marginTop: '2rem' }}>📋 Resultados (mock):</h3>
+      <ul>
+        {resultados.map((item) => (
+          <li key={item.id}>
+            <strong>{item.producto}</strong> — ${item.precio} — {item.fecha}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

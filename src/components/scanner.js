@@ -1,47 +1,57 @@
-// Scanner.js
-
-// src/components/ScannerButton.js
+// src/components/BarcodeScanner.js
 import React, { useRef, useState } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 
-const ScannerButton = ({ onScan }) => {
+const BarcodeScanner = ({ onScanComplete }) => {
   const videoRef = useRef(null);
-  const [scanning, setScanning] = useState(false);
   const codeReader = useRef(new BrowserMultiFormatReader());
+  const [scanning, setScanning] = useState(false);
 
-  const handleStartScan = async () => {
+  const startScan = async () => {
     setScanning(true);
-
     try {
       const result = await codeReader.current.decodeOnceFromVideoDevice(undefined, videoRef.current);
-      onScan(result.getText());
-      setScanning(false);
+      const codigo = result.getText();
+
+      const mockProducto = {
+        id: Date.now(),
+        producto: `Producto-${codigo.slice(-4)}`, // ejemplo ficticio
+        fecha: new Date().toLocaleString(),
+        precio: (Math.random() * 100).toFixed(2),
+      };
+
+      onScanComplete(mockProducto);
+      stopScan();
     } catch (error) {
-      console.error("Error escaneando:", error);
+      console.error("❌ Error escaneando:", error);
       setScanning(false);
     }
   };
 
-  const handleStopScan = () => {
-    codeReader.current.reset(); // Algunas versiones lo tienen, otras no
+  const stopScan = () => {
+    try {
+      codeReader.current.stopDecoding();
+    } catch (e) {
+      console.warn("No se pudo detener el escáner:", e);
+    }
     setScanning(false);
   };
 
   return (
     <div>
-      <button onClick={handleStartScan} disabled={scanning}>
-        {scanning ? 'Escaneando...' : 'Iniciar escaneo'}
-      </button>
+      {!scanning && (
+        <button onClick={startScan} style={{ padding: '10px 20px', fontSize: '16px' }}>
+          Escanear
+        </button>
+      )}
+
       {scanning && (
-        <div>
-          <video ref={videoRef} style={{ width: '300px', marginTop: '1rem' }} />
-          <button onClick={handleStopScan} style={{ marginTop: '1rem' }}>
-            Detener escaneo
-          </button>
+        <div style={{ marginTop: '1rem' }}>
+          <video ref={videoRef} style={{ width: '100%', maxWidth: '400px' }} />
         </div>
       )}
     </div>
   );
 };
 
-export default ScannerButton;
+export default BarcodeScanner;
