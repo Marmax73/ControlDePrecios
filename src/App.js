@@ -1,23 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
 
+import './App.css';
+import Scanner from './components/scanner';
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h3>Escanée el producto</h3>
+        <h5>Utilice la cámara de su móvil</h5>
+        
+       
+
       </header>
+      return (
+        <Scanner
+          onResult={(result) => {
+            alert(`Código de barras escaneado: ${result}`);
+          }}
+        />
+      )
     </div>
   );
 }
