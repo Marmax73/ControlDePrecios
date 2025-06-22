@@ -1,29 +1,47 @@
 // Scanner.js
-import React, { useEffect } from 'react';
+
+// src/components/ScannerButton.js
+import React, { useRef, useState } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 
-const Scanner = ({ onResult }) => {
-  useEffect(() => {
-    const codeReader = new BrowserMultiFormatReader();
+const ScannerButton = ({ onScan }) => {
+  const videoRef = useRef(null);
+  const [scanning, setScanning] = useState(false);
+  const codeReader = useRef(new BrowserMultiFormatReader());
 
-    codeReader
-      .decodeOnceFromVideoDevice(undefined, 'reader')
-      .then((result) => {
-        onResult(result.getText());
-      })
-      .catch((err) => console.error(err));
+  const handleStartScan = async () => {
+    setScanning(true);
 
-    return () => {
-      // En lugar de reset()
-      try {
-        codeReader.stopDecoding(); // o stopContinuousDecode()
-      } catch (e) {
-        console.warn('Error al detener el escaneo:', e);
-      }
-    };
-  }, [onResult]);
+    try {
+      const result = await codeReader.current.decodeOnceFromVideoDevice(undefined, videoRef.current);
+      onScan(result.getText());
+      setScanning(false);
+    } catch (error) {
+      console.error("Error escaneando:", error);
+      setScanning(false);
+    }
+  };
 
-  return <div id="reader" style={{ width: '500px' }} />;
+  const handleStopScan = () => {
+    codeReader.current.reset(); // Algunas versiones lo tienen, otras no
+    setScanning(false);
+  };
+
+  return (
+    <div>
+      <button onClick={handleStartScan} disabled={scanning}>
+        {scanning ? 'Escaneando...' : 'Iniciar escaneo'}
+      </button>
+      {scanning && (
+        <div>
+          <video ref={videoRef} style={{ width: '300px', marginTop: '1rem' }} />
+          <button onClick={handleStopScan} style={{ marginTop: '1rem' }}>
+            Detener escaneo
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };
 
-export default Scanner;
+export default ScannerButton;
